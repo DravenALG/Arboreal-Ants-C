@@ -68,6 +68,37 @@ double *init_flow(bool is_forward){
 	} 
 	return flow;
 }
+
+
+/* Normalize the pheromean*/
+int normalize(double **pher, bool is_row){
+	double **normalize_pher = new double*[number_of_vertics];
+	for (int i = 0; i < number_of_vertics; i++){
+		normalize_pher[i] = new double[number_of_vertics];
+	}
+	if(is_row){
+		for (int i = 0; i < number_of_vertics; i++){
+			double sum = 0;
+			for(int j = 0; j < number_of_vertics; j++){
+				sum += pher[i][j];
+			}
+			for(int j = 0; j < number_of_vertics; j++){
+				normalize_pher[i][j] = pher[i][j] / sum;
+			}
+		}
+	}
+	else{
+		for(int j = 0; j < number_of_vertics; j++){
+			double sum = 0;
+			for (int i = 0; i < number_of_vertics; i++){
+				sum += pher[i][j];
+			}
+			for (int i = 0; i < number_of_vertics; i++){
+				normalize_pher[i][j] = pher[i][j] / sum;
+			}
+		}
+	}
+}
 	
 
 /* Main */
@@ -84,6 +115,15 @@ int main() {
 	
 	
 	for(int iter=0; iter<max_iter; iter++){
+		// normalize the pheromone
+		double **norm_pher_forward =  normalize(pher, true);
+		double **norm_pher_backward =  normalize(pher, false);
+		
+		// update pheromone
+		
+		
+		// updtae forward_flow and backward_flow
+		
 	}
 	
     return 0;
