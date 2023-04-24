@@ -12,6 +12,7 @@ const int max_iter = 1000;
 const double start_flow = 1;
 const double end_flow = 1;
 
+
 /* Load graph */
 double **load_graph()
 {
@@ -32,13 +33,13 @@ double **load_graph()
 }
 
 /* Init pheromone */
-double **init_pher(double **graph){
+double **init_pher(){
 	double **init_pher = new double*[number_of_vertics];
 	for (int i = 0; i < number_of_vertics; i++)
 	{
 		init_pher[i] = new double[number_of_vertics];
 		for(int j = 0; j < number_of_vertics; j++)
-			init_pher[i][j] = graph[i][j];
+			init_pher[i][j] = 0;
 	}
  
 	return init_pher;
@@ -99,13 +100,13 @@ int normalize(double **pher, bool is_row){
 		}
 	}
 }
-	
+
 
 /* Main */
 int main() {
     double **graph = load_graph();
     cout << "-----------load graph, done-----------\n";
-	double **pher = init_pher(graph);
+	double **pher = init_pher();
 	cout << "-----------initialize the phermone, done-----------\n";
 	double *leakage = init_leakage();
 	cout << "-----------initialize the leakage, done-----------\n";
