@@ -19,8 +19,8 @@ void getAllFiles(string path, vector<string>& files) {
     //文件句柄
     long hFile = 0;
     //文件信息
-    struct _finddata_t fileinfo;  //很少用的文件信息读取结构
-    string p;  //string类很有意思的一个赋值函数:assign()，有很多重载版本
+    struct _finddata_t fileinfo;  
+    string p;  
     if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(),&fileinfo)) != -1) {
         do {
             if ((fileinfo.attrib & _A_SUBDIR)) {  //比较文件类型是否是文件夹
@@ -235,12 +235,7 @@ double **arboreal_ants(const char *path) {
 //	}
 
 	return pher;
-	
-	
 }
-
-
-
 
 
 /* Main */
