@@ -103,14 +103,16 @@ double **normalize(double **pher, bool is_row){
 	return normalize_pher;
 }
 
+
 /* Update the pheromean*/
 double **update(double **pher, double **forward_flow_matrix, double **backward_flow_matrix){
 	for (int i = 0; i < number_of_vertics; i++){
 		for(int j = 0; j < number_of_vertics; j++){
-			pher[i][j] = decay * pher[i][j] * forward_flow_matrix[i][j] * backward_flow_matrix[i][j];
+			pher[i][j] = decay * (pher[i][j] + forward_flow_matrix[i][j] + backward_flow_matrix[i][j]);
 		}
 	}	
 }
+
 
 /* Flow matrix calculation */ 
 double **flow_matrix(double **matrix, double *vertor, bool is_col){
@@ -134,6 +136,7 @@ double **flow_matrix(double **matrix, double *vertor, bool is_col){
 	}
 	return result;
 }
+
 
 /* New flow calculation */ 
 double *new_flow(double **matrix, bool is_col){
@@ -160,6 +163,17 @@ double *new_flow(double **matrix, bool is_col){
 }
 
 
+int decrease(double **matrix, double *vertor1, double *vertor2){
+	for (int i = 0; i < number_of_vertics; i++){
+		for (int j = 0; j < number_of_vertics; j++){
+			matrix[i][j] = matrix[i][j] / inc_rate;
+		}
+		vertor1[i] = vertor1[i] / inc_rate;
+		vertor2[i] = vertor2[i] / inc_rate;
+	}
+}
+
+
 
 /* Main */
 int main() {
@@ -178,30 +192,32 @@ int main() {
 		// normalize the pheromone
 		double **norm_pher_forward =  normalize(pher, true);
 		double **norm_pher_backward =  normalize(pher, false);
-			
-		// update pheromone
+
+		// update pheromone	
 		double **forward_flow_matrix = flow_matrix(norm_pher_forward, forward_flow, true);
 		double **backward_flow_matrix = flow_matrix(norm_pher_backward, backward_flow, false);
-		update(pher, forward_flow_matrix, norm_pher_backward);
+		update(pher, forward_flow_matrix, backward_flow_matrix);
 
-		
 		// updtae forward_flow and backward_flow
-		double *forward_flow = new_flow(forward_flow_matrix, true);
-		double *backward_flow = new_flow(backward_flow_matrix, false);
+		forward_flow = new_flow(forward_flow_matrix, true);
+		backward_flow = new_flow(backward_flow_matrix, false);
 		forward_flow[0] = start_flow * inc_rate;
 		backward_flow[number_of_vertics-1] = end_flow * inc_rate;
+		
+		// decrease the value (just optional)
+		decrease(pher, forward_flow, backward_flow);
 		
 		// next iteration
 		iter++;
 	}
 	
-	cout << "-----------Final pheromone matrix-----------\n";
-	for (int i = 0; i < number_of_vertics; i++){
-		for (int j = 0; j < number_of_vertics; j++){
-			cout << pher[i][j];
-		}
+		cout << "-----------iter-----------\n";
+		for (int i = 0; i < number_of_vertics; i++){
+			for (int j = 0; j < number_of_vertics; j++){
+				cout << pher[i][j] << " ";
+			}
 		cout << "\n";
-	}
+		}
 	
     return 0;
 }
