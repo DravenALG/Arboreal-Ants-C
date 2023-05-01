@@ -19,6 +19,71 @@ const double decay = 1;
 const double eps = 1e-10;
 
 
+/* Load graph */
+double **load_graph(const char *path) {
+	double **graph = new double*[number_of_vertics];
+	
+	// open file
+	ifstream file;
+	file.open(path);
+
+	for (int i = 0; i < number_of_vertics; i++) {
+		graph[i] = new double[number_of_vertics];
+		for(int j = 0; j < number_of_vertics; j++)
+			file >> graph[i][j];
+	}
+
+	return graph;
+}
+
+
+
+int findMinDist(double* shortestDist, bool* visited, int n) {
+    int minDist = INT_MAX, minIndex = -1;
+    for (int i = 0; i < n; i++) {
+        if (!visited[i] && shortestDist[i] < minDist) {
+            minDist = shortestDist[i];
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
+
+double* dijkstra(const char *path, int start, int n) {
+	double **weight = load_graph(path);
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 100; j++) {
+			if (weight[i][j] == 0){
+				weight[i][j] = 10000000;
+			}
+		}
+	}
+	
+    double* shortestDist = new double[n];
+    bool* visited = new bool[n];
+    for (int i = 0; i < n; i++) {
+        shortestDist[i] = weight[start][i];
+        visited[i] = false;
+    }
+    shortestDist[start] = 0;
+    visited[start] = true;
+    for (int i = 1; i < n; i++) {
+        int k = findMinDist(shortestDist, visited, n);
+        visited[k] = true;
+        for (int j = 0; j < n; j++) {
+            if (!visited[j] && shortestDist[k] + weight[k][j] < shortestDist[j]) {
+                shortestDist[j] = shortestDist[k] + weight[k][j];
+            }
+        }
+    }
+    delete[] visited;
+    return shortestDist;
+}
+
+
+
+
+
 
 
 vector<int> find_best_path(double **pher) {
@@ -72,22 +137,6 @@ void getAllFiles(string path, vector<string>& files) {
    }
 }
 
-/* Load graph */
-double **load_graph(const char *path) {
-	double **graph = new double*[number_of_vertics];
-	
-	// open file
-	ifstream file;
-	file.open(path);
-
-	for (int i = 0; i < number_of_vertics; i++) {
-		graph[i] = new double[number_of_vertics];
-		for(int j = 0; j < number_of_vertics; j++)
-			file >> graph[i][j];
-	}
-
-	return graph;
-}
 
 /* Init pheromone */
 double **init_pher(double ** graph) {
@@ -226,17 +275,17 @@ int decrease(double **matrix, double *vertor1, double *vertor2) {
 
 
 
-double **arboreal_ants(const char *path) {
+int arboreal_ants(const char *path) {
 	
 	double **graph = load_graph(path);
-	cout << "-----------load graph, done-----------\n";
+	//cout << "-----------load graph, done-----------\n";
 	double **pher = init_pher(graph);
-	cout << "-----------initialize the phermone, done-----------\n";
+	//cout << "-----------initialize the phermone, done-----------\n";
 	double *leakage = init_leakage();
-	cout << "-----------initialize the leakage, done-----------\n";
+	//cout << "-----------initialize the leakage, done-----------\n";
 	double *forward_flow = init_flow(true);
 	double *backward_flow = init_flow(false);
-	cout << "-----------initialize forward and backward flows, done-----------\n";
+	//cout << "-----------initialize forward and backward flows, done-----------\n";
 
 
 	for(int iter=0; iter<max_iter; iter++) {
@@ -271,14 +320,16 @@ double **arboreal_ants(const char *path) {
 //	}
 	vector<int> best_path;
 	best_path = find_best_path(pher);
-	cout << "\n ######### Best Path #########\n";
-	for (int i = 0; i < best_path.size(); i++) {
-        cout << best_path[i] << " ";
-    }
-    cout << "\n #############################\n";
+	//cout<<"\n @@@@@@@@@@@@@@Path Length: "<<best_path.size()<<" @@@@@@@@@@@@@@@@"<<endl;
+	//cout << "######### Best Path #########\n";
+	//for (int i = 0; i < best_path.size(); i++) {
+    //    cout << best_path[i] << " ";
+    //}
+    //cout << "\n #############################\n";
+    int shortest_path_length = best_path.size();
 
 
-	return pher;
+	return shortest_path_length;
 }
 
 
@@ -288,16 +339,20 @@ int main() {
 	char filePath[] = "data";
 	getAllFiles(filePath, files);
 	int size = files.size();
+	int arboreal_shortest_path_length;
+	int dijkstra_shortest_path_length;
+	int start_node = 0;
 	
 	for (int i = 0; i < size; i++) {
 		cout<<"-----------Graph Path: "<<files[i]<<" -----------"<<endl;
 		string string_path = files[i];
 		const char *path=string_path.c_str();
-		double **pher = arboreal_ants(path);
+		arboreal_shortest_path_length = arboreal_ants(path);
+		double* shortestDist = dijkstra(path, start_node, number_of_vertics);
+		dijkstra_shortest_path_length = shortestDist[99];
+		cout << "\n ####### Arboreal Ants Shortest Path: " << arboreal_shortest_path_length << "#######\n";
+		cout << "####### Dijkstra Shortest Path: " << dijkstra_shortest_path_length << "#######\n";
+		cout << "-------------------------------------------";
+		
 	}
 }
-
-
-
-
-
