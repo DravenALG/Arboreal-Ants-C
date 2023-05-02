@@ -349,7 +349,7 @@ int main() {
 	const char *path=string_path.c_str();
 	arboreal_shortest_path_length = arboreal_ants(path);
 	double* shortestDist = dijkstra(path, start_node, number_of_vertics);
-	dijkstra_shortest_path_length = shortestDist[99];
+	dijkstra_shortest_path_length = shortestDist[number_of_vertics-1];
 	cout << "####### Arboreal Ants Shortest Path: " << arboreal_shortest_path_length << "#######\n";
 	cout << "####### Dijkstra Shortest Path: " << dijkstra_shortest_path_length << "#######\n";
 	cout << "-------------------------------------------\n\n";
