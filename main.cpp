@@ -99,7 +99,7 @@ vector<int> find_best_path(double **pher) {
                 candidate_nodes.push_back(i); 
             }
         }
-        if(counter > 100 or max_pher == 0){
+        if(counter > 10000 or max_pher == 0){
         	has_short = false;
             break;
 		}
@@ -333,7 +333,7 @@ int main() {
 		cout<<"-----------Graph Path: "<<files[i]<<" -----------"<<endl;
 		string string_path = files[i];
 		const char *path=string_path.c_str();
-		arboreal_shortest_path_length = arboreal_ants(path);
+		arboreal_shortest_path_length = arboreal_ants(path) - 1;
 		double* shortestDist = dijkstra(path, start_node, number_of_vertics);
 		dijkstra_shortest_path_length = shortestDist[99];
 		if(has_short){
