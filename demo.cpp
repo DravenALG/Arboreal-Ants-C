@@ -7,9 +7,9 @@
 #include<algorithm>
 using namespace std;
 /* Basic config */
-const char filename[] = "data/gnpLoc_w_loop_w_leakage_52.txt"; // file to save the graph
+const char filename[] = "./demo_graph01.txt"; // file to save the graph
 //const char filename[] = "data/gnp_w_loop_w_leakage_0.txt"; // file to save the graph
-const int number_of_vertics = 100; // numbers of the vertics in the graph
+const int number_of_vertics = 4; // numbers of the vertics in the graph
 const double leakage_val = 0.1; // the leakage of each vertics
 const double inc_rate = 1; // factor by which flow increases at each time step
 const int max_iter = 1000;
