@@ -7,16 +7,15 @@
 #include<algorithm>
 using namespace std;
 /* Basic config */
-const char filename[] = "data/gnpLoc_w_loop_w_leakage_52.txt"; // file to save the graph
 //const char filename[] = "data/gnp_w_loop_w_leakage_0.txt"; // file to save the graph
 const int number_of_vertics = 100; // numbers of the vertics in the graph
 const double leakage_val = 0.1; // the leakage of each vertics
 const double inc_rate = 1; // factor by which flow increases at each time step
-const int max_iter = 1000;
+const int max_iter = 100;
 const double start_flow = 1;
 const double end_flow = 1;
-const double decay = 1;
-const double eps = 1e-10;
+const double decay = 0.9;
+bool has_short = true;
 
 
 /* Load graph */
@@ -37,7 +36,7 @@ double **load_graph(const char *path) {
 }
 
 
-
+/* Dijkstra */
 int findMinDist(double* shortestDist, bool* visited, int n) {
     int minDist = INT_MAX, minIndex = -1;
     for (int i = 0; i < n; i++) {
@@ -82,49 +81,46 @@ double* dijkstra(const char *path, int start, int n) {
 
 
 
-
-
-
-
+/* find the path based on pheromone */
 vector<int> find_best_path(double **pher) {
     vector<int> path;
-    path.push_back(0); // 添加第一个节点
+    path.push_back(0); 
     int current_node = 0;
-    while (current_node != number_of_vertics - 1) { // 当前节点不是最后一个节点
+    int counter = 0;
+    while (current_node != number_of_vertics - 1) { 
         double max_pher = -1;
-        vector<int> candidate_nodes; // 候选节点列表
+        vector<int> candidate_nodes; 
         for (int i = 0; i < number_of_vertics; i++) {
             if (i != current_node && pher[current_node][i] > max_pher) {
                 max_pher = pher[current_node][i];
-                candidate_nodes.clear(); // 清空候选节点列表
-                candidate_nodes.push_back(i); // 将当前节点加入候选节点列表
+                candidate_nodes.clear(); 
+                candidate_nodes.push_back(i); 
             } else if (i != current_node && pher[current_node][i] == max_pher) {
-                candidate_nodes.push_back(i); // 将具有相同信息素值的节点加入候选节点列表
+                candidate_nodes.push_back(i); 
             }
         }
-        if (candidate_nodes.empty()) { // 如果找不到候选节点，则路径无法完成
-            path.clear();
+        if(counter > 100 or max_pher == 0){
+        	has_short = false;
             break;
-        }
-        int next_node = candidate_nodes[rand() % candidate_nodes.size()]; // 从候选节点列表中随机选择一个节点作为下一个节点
+		}
+        int next_node = candidate_nodes[rand() % candidate_nodes.size()]; 
         path.push_back(next_node);
         current_node = next_node;
+        counter++;
     }
     return path;
 }
 
 
 
-
+/* Load All Files */
 void getAllFiles(string path, vector<string>& files) {
-    //鏂囦欢鍙ユ焺
     long hFile = 0;
-    //鏂囦欢淇℃伅
     struct _finddata_t fileinfo;  
     string p;  
     if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(),&fileinfo)) != -1) {
         do {
-            if ((fileinfo.attrib & _A_SUBDIR)) {  //姣旇緝鏂囦欢绫诲瀷鏄惁鏄枃浠跺す
+            if ((fileinfo.attrib & _A_SUBDIR)) {
                if (strcmp(fileinfo.name,".") != 0 && strcmp(fileinfo.name,"..") != 0) {
                    files.push_back(p.assign(path).append("\\").append(fileinfo.name));
                    getAllFiles(p.assign(path).append("\\").append(fileinfo.name), files);
@@ -132,7 +128,7 @@ void getAllFiles(string path, vector<string>& files) {
            } else {
                files.push_back(p.assign(path).append("\\").append(fileinfo.name));
            }
-       } while (_findnext(hFile, &fileinfo) == 0);  //瀵绘壘涓嬩竴涓紝鎴愬姛杩斿洖0锛屽惁鍒?1
+       } while (_findnext(hFile, &fileinfo) == 0);
        _findclose(hFile);
    }
 }
@@ -187,8 +183,10 @@ double **normalize(double **pher, bool is_row) {
 			for(int j = 0; j < number_of_vertics; j++) {
 				sum += pher[i][j];
 			}
-			for(int j = 0; j < number_of_vertics; j++) {
-				normalize_pher[i][j] = pher[i][j] / (sum + eps);
+			if(sum != 0){
+				for(int j = 0; j < number_of_vertics; j++) {
+					normalize_pher[i][j] = pher[i][j] / sum;
+				}
 			}
 		}
 	} else {
@@ -197,8 +195,10 @@ double **normalize(double **pher, bool is_row) {
 			for (int i = 0; i < number_of_vertics; i++) {
 				sum += pher[i][j];
 			}
-			for (int i = 0; i < number_of_vertics; i++) {
-				normalize_pher[i][j] = pher[i][j] / (sum + eps);
+			if(sum != 0){
+				for (int i = 0; i < number_of_vertics; i++) {
+					normalize_pher[i][j] = pher[i][j] / sum;
+				}
 			}
 		}
 	}
@@ -310,22 +310,8 @@ int arboreal_ants(const char *path) {
 		// next iteration
 		iter++;
 	}
-
-//	cout << "-----------iter-----------\n";
-//	for (int i = 0; i < number_of_vertics; i++) {
-//		for (int j = 0; j < number_of_vertics; j++) {
-//			cout << pher[i][j] << " ";
-//		}
-//		cout << "\n";
-//	}
 	vector<int> best_path;
 	best_path = find_best_path(pher);
-	//cout<<"\n @@@@@@@@@@@@@@Path Length: "<<best_path.size()<<" @@@@@@@@@@@@@@@@"<<endl;
-	//cout << "######### Best Path #########\n";
-	//for (int i = 0; i < best_path.size(); i++) {
-    //    cout << best_path[i] << " ";
-    //}
-    //cout << "\n #############################\n";
     int shortest_path_length = best_path.size();
 
 
@@ -350,9 +336,14 @@ int main() {
 		arboreal_shortest_path_length = arboreal_ants(path);
 		double* shortestDist = dijkstra(path, start_node, number_of_vertics);
 		dijkstra_shortest_path_length = shortestDist[99];
-		cout << "####### Arboreal Ants Shortest Path: " << arboreal_shortest_path_length << "#######\n";
-		cout << "####### Dijkstra Shortest Path: " << dijkstra_shortest_path_length << "#######\n";
-		cout << "-------------------------------------------\n\n";
-		
+		if(has_short){
+			cout << "####### Arboreal Ants Shortest Path: " << arboreal_shortest_path_length << "#######\n";
+			cout << "####### Dijkstra Shortest Path: " << dijkstra_shortest_path_length << "#######\n";
+			cout << "-------------------------------------------\n\n";
+		}	
+		else{
+				cout << "####### Arboreal Ants Has no Shortest Path" << "#######\n";
+		}
+		has_short = true;
 	}
 }
