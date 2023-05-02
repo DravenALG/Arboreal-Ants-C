@@ -51,8 +51,8 @@ int findMinDist(double* shortestDist, bool* visited, int n) {
 
 double* dijkstra(const char *path, int start, int n) {
 	double **weight = load_graph(path);
-	for (int i = 0; i < 100; i++) {
-		for (int j = 0; j < 100; j++) {
+	for (int i = 0; i < number_of_vertics; i++) {
+		for (int j = 0; j < number_of_vertics; j++) {
 			if (weight[i][j] == 0){
 				weight[i][j] = 10000000;
 			}
@@ -88,25 +88,25 @@ double* dijkstra(const char *path, int start, int n) {
 
 vector<int> find_best_path(double **pher) {
     vector<int> path;
-    path.push_back(0); // ���ӵ�һ���ڵ�
+    path.push_back(0); // 添加第一个节点
     int current_node = 0;
-    while (current_node != number_of_vertics - 1) { // ��ǰ�ڵ㲻�����һ���ڵ�
+    while (current_node != number_of_vertics - 1) { // 当前节点不是最后一个节点
         double max_pher = -1;
-        vector<int> candidate_nodes; // ��ѡ�ڵ��б�
+        vector<int> candidate_nodes; // 候选节点列表
         for (int i = 0; i < number_of_vertics; i++) {
             if (i != current_node && pher[current_node][i] > max_pher) {
                 max_pher = pher[current_node][i];
-                candidate_nodes.clear(); // ��պ�ѡ�ڵ��б�
-                candidate_nodes.push_back(i); // ����ǰ�ڵ�����ѡ�ڵ��б�
+                candidate_nodes.clear(); // 清空候选节点列表
+                candidate_nodes.push_back(i); // 将当前节点加入候选节点列表
             } else if (i != current_node && pher[current_node][i] == max_pher) {
-                candidate_nodes.push_back(i); // ��������ͬ��Ϣ��ֵ�Ľڵ�����ѡ�ڵ��б�
+                candidate_nodes.push_back(i); // 将具有相同信息素值的节点加入候选节点列表
             }
         }
-        if (candidate_nodes.empty()) { // ����Ҳ�����ѡ�ڵ㣬��·���޷����
+        if (candidate_nodes.empty()) { // 如果找不到候选节点，则路径无法完成
             path.clear();
             break;
         }
-        int next_node = candidate_nodes[rand() % candidate_nodes.size()]; // �Ӻ�ѡ�ڵ��б������ѡ��һ���ڵ���Ϊ��һ���ڵ�
+        int next_node = candidate_nodes[rand() % candidate_nodes.size()]; // 从候选节点列表中随机选择一个节点作为下一个节点
         path.push_back(next_node);
         current_node = next_node;
     }
@@ -117,14 +117,14 @@ vector<int> find_best_path(double **pher) {
 
 
 void getAllFiles(string path, vector<string>& files) {
-    //文件句柄
+    //鏂囦欢鍙ユ焺
     long hFile = 0;
-    //文件信息
+    //鏂囦欢淇℃伅
     struct _finddata_t fileinfo;  
     string p;  
     if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(),&fileinfo)) != -1) {
         do {
-            if ((fileinfo.attrib & _A_SUBDIR)) {  //比较文件类型是否是文件夹
+            if ((fileinfo.attrib & _A_SUBDIR)) {  //姣旇緝鏂囦欢绫诲瀷鏄惁鏄枃浠跺す
                if (strcmp(fileinfo.name,".") != 0 && strcmp(fileinfo.name,"..") != 0) {
                    files.push_back(p.assign(path).append("\\").append(fileinfo.name));
                    getAllFiles(p.assign(path).append("\\").append(fileinfo.name), files);
@@ -132,7 +132,7 @@ void getAllFiles(string path, vector<string>& files) {
            } else {
                files.push_back(p.assign(path).append("\\").append(fileinfo.name));
            }
-       } while (_findnext(hFile, &fileinfo) == 0);  //寻找下一个，成功返回0，否�?1
+       } while (_findnext(hFile, &fileinfo) == 0);  //瀵绘壘涓嬩竴涓紝鎴愬姛杩斿洖0锛屽惁鍒?1
        _findclose(hFile);
    }
 }
