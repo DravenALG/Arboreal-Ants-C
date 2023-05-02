@@ -308,11 +308,11 @@ int arboreal_ants(const char *path) {
 		decrease(pher, forward_flow, backward_flow);
 
 		// next iteration
-		iter++;
+		//iter++;
 	}
 	vector<int> best_path;
 	best_path = find_best_path(pher);
-    int shortest_path_length = best_path.size();
+    int shortest_path_length = best_path.size() - 1;
 
 
 	return shortest_path_length;
