@@ -11,10 +11,10 @@ using namespace std;
 const int number_of_vertics = 100; // numbers of the vertics in the graph
 const double leakage_val = 0.1; // the leakage of each vertics
 const double inc_rate = 1; // factor by which flow increases at each time step
-const int max_iter = 100;
+const int max_iter = 1000;
 const double start_flow = 1;
 const double end_flow = 1;
-const double decay = 0.9;
+const double decay = 1;
 bool has_short = true;
 
 
@@ -99,10 +99,10 @@ vector<int> find_best_path(double **pher) {
                 candidate_nodes.push_back(i); 
             }
         }
-        if(counter > 10000 or max_pher == 0){
-        	has_short = false;
-            break;
-		}
+//        if(counter > 100 or max_pher == 0){
+//        	has_short = false;
+//            break;
+//		}
         int next_node = candidate_nodes[rand() % candidate_nodes.size()]; 
         path.push_back(next_node);
         current_node = next_node;
@@ -240,9 +240,9 @@ double **flow_matrix(double **matrix, double *vertor, bool is_col) {
 
 
 /* New flow calculation */
-double *new_flow(double **matrix, bool is_col) {
+double *new_flow(double **matrix, bool is_row) {
 	double *result = new double[number_of_vertics];
-	if(is_col) {
+	if(is_row) {
 		for (int i = 0; i < number_of_vertics; i++) {
 			double sum = 0;
 			for (int j = 0; j < number_of_vertics; j++) {
@@ -298,17 +298,23 @@ int arboreal_ants(const char *path) {
 		double **backward_flow_matrix = flow_matrix(norm_pher_backward, backward_flow, false);
 		update(pher, forward_flow_matrix, backward_flow_matrix);
 
+//		cout << "---------------- Iteration ----------------\n";
+//		for (int i = 0; i < number_of_vertics; i++) {
+//			for (int j = 0; j < number_of_vertics; j++) {
+//				cout << forward_flow_matrix[i][j] << " ";
+//			}
+//			cout << "\n" ;
+//		}
+
 		// updtae forward_flow and backward_flow
-		forward_flow = new_flow(forward_flow_matrix, true);
-		backward_flow = new_flow(backward_flow_matrix, false);
+		forward_flow = new_flow(forward_flow_matrix, false);
+		backward_flow = new_flow(backward_flow_matrix, true);
 		forward_flow[0] = start_flow * inc_rate;
 		backward_flow[number_of_vertics-1] = end_flow * inc_rate;
+		
 
 		// decrease the value (just optional)
 		decrease(pher, forward_flow, backward_flow);
-
-		// next iteration
-		//iter++;
 	}
 	vector<int> best_path;
 	best_path = find_best_path(pher);
@@ -333,7 +339,7 @@ int main() {
 		cout<<"-----------Graph Path: "<<files[i]<<" -----------"<<endl;
 		string string_path = files[i];
 		const char *path=string_path.c_str();
-		arboreal_shortest_path_length = arboreal_ants(path) - 1;
+		arboreal_shortest_path_length = arboreal_ants(path);
 		double* shortestDist = dijkstra(path, start_node, number_of_vertics);
 		dijkstra_shortest_path_length = shortestDist[99];
 		if(has_short){
@@ -342,7 +348,8 @@ int main() {
 			cout << "-------------------------------------------\n\n";
 		}	
 		else{
-				cout << "####### Arboreal Ants Has no Shortest Path" << "#######\n";
+				cout << "####### Arboreal Ants Has No Shortest Path" << "#######\n";
+				cout << "-------------------------------------------\n\n";
 		}
 		has_short = true;
 	}
