@@ -6,21 +6,26 @@
 #include <limits>
 #include<algorithm>
 using namespace std;
+
 /* Basic config */
 const int number_of_vertics = 100; // numbers of the vertics in the graph
 const double leakage_val = 0.1; // the leakage of each vertics
 const double inc_rate = 1; // factor by which flow increases at each time step
-const int max_iter = 2000;
-const double start_flow = 1;
-const double end_flow = 1;
-const double decay = 0.9;
-const bool bidirectional_flow = true;
-const bool rand_initial = false;
-const bool nonlinear = false; 
+const int max_iter = 2000; // numbers of max iterations 
+const bool bidirectional_flow = false; // whether use bidirectional flow
+const bool rand_initial = false; // whether use random initialization of pheromone in each edge
+const bool nonlinear = false; // whether use nonlinear relu
 
+/* Additinal config (no need to change) */
+const double start_flow = 1; // numbers of state flow
+const double end_flow = 1; // numbers of end flow
+const double decay = 0.9; // numbers of decay, use to minic the flow increase
+
+/* Use to identify the state of the algorithm */
 bool has_short = true;
 bool loop = false;
 bool dead_end = false;
+const bool MAX_WEIGHT = 1000000;
 
 
 /* Load All Files */
@@ -89,7 +94,7 @@ double dijkstra(const char *path, int start, int n) {
 	for (int i = 0; i < 100; i++) {
 		for (int j = 0; j < 100; j++) {
 			if (weight[i][j] == 0){
-				weight[i][j] = 10000000;
+				weight[i][j] = MAX_WEIGHT;
 			}
 		}
 	}
@@ -431,7 +436,7 @@ int main() {
 			if(dead_end){
 				cout << "####### Converge to Dead End" << " #######\n";
 			}
-			if(dijkstra_shortest_path_length == 10000000){
+			if(dijkstra_shortest_path_length >= MAX_WEIGHT){
 				cout << "####### Dijkstra Has No Shortest Path" << dijkstra_shortest_path_length << " #######\n";
 			}
 			else{
